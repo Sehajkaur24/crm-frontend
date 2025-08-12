@@ -44,32 +44,32 @@ export default function AddUserPage() {
       <h1 className="text-2xl font-bold mb-4">Add User</h1>
 
       <form onSubmit={handleAddUser} className="space-y-4">
-       <FormInput
-  id="fullName"
-  label="Full Name"
-  type="text"
-  value={fullName}
-  onChange={(e) => setFullName(e.target.value)}
-  required
-/>
+        <FormInput
+          id="fullName"
+          label="Full Name"
+          type="text"
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
+          required
+        />
 
-<FormInput
-  id="email"
-  label="Email"
-  type="email"
-  value={email}
-  onChange={(e) => setEmail(e.target.value)}
-  required
-/>
+        <FormInput
+          id="email"
+          label="Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
 
-<FormInput
-  id="password"
-  label="Password"
-  type="password"
-  value={password}
-  onChange={(e) => setPassword(e.target.value)}
-  required
-/>
+        <FormInput
+          id="password"
+          label="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
 
         <Button type="submit" text="Add User" />
       </form>
