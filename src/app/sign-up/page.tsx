@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
 import React from 'react';
-import { registerAdmin } from './../api/user-api';
-import FormInput from './../components/input';
+import { registerAdmin } from '@/api/user-api';
+import FormInput from '@/components/FormInput';
+import Button from '@/components/Button';
 
 export default function SignupPage() {
   const [fullName, setFullName] = useState('');
@@ -154,17 +155,18 @@ export default function SignupPage() {
           )}
 
           <div className="col-span-2">
-            <button
+            <Button
               type="submit"
-              disabled={loading}
-              className="w-full bg-[#7F55B1] hover:bg-[#9B7EBD] text-white text-base font-semibold py-3 rounded-xl transition duration-300"
-            >
-              {loading ? 'Creating Account...' : 'Create CRM Account'}
-            </button>
+              text={loading ? 'Creating Account...' : 'Create CRM Account'}
+              variant="primary"
+            />
           </div>
 
           <div className="col-span-2 text-center text-[#7F55B1] text-sm mt-2">
-            Already have an account? <span className="text-[#F49BAB] font-medium hover:underline cursor-pointer">Log in</span>
+            Already have an account?{" "}
+            <span className="text-[#F49BAB] font-medium hover:underline cursor-pointer">
+              Log in
+            </span>
           </div>
         </form>
       </div>

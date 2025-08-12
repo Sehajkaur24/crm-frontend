@@ -1,35 +1,42 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { addUserToOrganization } from "@/api/user-api";
+import FormInput from "@/components/FormInput";
+import Button from "@/components/Button";
 
 export default function AddUserPage() {
-  
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [orgId, setOrgId] = useState<string | null>(null);
 
-  const orgId = 1; 
+  useEffect(() => {
+    const storedOrgId = localStorage.getItem("org_id");
+    setOrgId(storedOrgId);
+  }, []);
 
   const handleAddUser = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const response = await fetch(`http://localhost:8000/v1/organisations/${orgId}/users`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        full_name: fullName,
-        email,
-        password,
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      alert("Failed to add user: " + error.detail);
+    if (!orgId) {
+      alert("Organization ID not found. Please log in again.");
       return;
     }
 
-    const data = await response.json();
-    alert("User added successfully!");
+    try {
+      await addUserToOrganization(Number(orgId), {
+        full_name: fullName,
+        email,
+        password,
+      });
+
+      alert("User added successfully!");
+      setFullName("");
+      setEmail("");
+      setPassword("");
+    } catch (err: any) {
+      alert("Failed to add user: " + err.message);
+    }
   };
 
   return (
@@ -37,45 +44,34 @@ export default function AddUserPage() {
       <h1 className="text-2xl font-bold mb-4">Add User</h1>
 
       <form onSubmit={handleAddUser} className="space-y-4">
-        <div>
-          <label className="block font-medium">Full Name</label>
-          <input
-            type="text"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            className="w-full border px-4 py-2 rounded"
-            required
-          />
-        </div>
+       <FormInput
+  id="fullName"
+  label="Full Name"
+  type="text"
+  value={fullName}
+  onChange={(e) => setFullName(e.target.value)}
+  required
+/>
 
-        <div>
-          <label className="block font-medium">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full border px-4 py-2 rounded"
-            required
-          />
-        </div>
+<FormInput
+  id="email"
+  label="Email"
+  type="email"
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+  required
+/>
 
-        <div>
-          <label className="block font-medium">Password</label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full border px-4 py-2 rounded"
-            required
-          />
-        </div>
+<FormInput
+  id="password"
+  label="Password"
+  type="password"
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+  required
+/>
 
-        <button
-          type="submit"
-          className="bg-[#7F55B1] text-white px-4 py-2 rounded hover:bg-[#6e49a0]"
-        >
-          Add User
-        </button>
+        <Button type="submit" text="Add User" />
       </form>
     </div>
   );

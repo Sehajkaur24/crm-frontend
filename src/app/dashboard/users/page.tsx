@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import DashboardLayout from './../../components/DashboardLayout';
-import { addUserToOrganization, getUsersByOrganization } from "../../api/user-api";
+
+import { addUserToOrganization, getUsersByOrganization } from "@/api/user-api";
 
 type User = {
   id: number;
@@ -19,45 +19,58 @@ export default function UserPage() {
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ full_name: '', email: '', password: '' });
 
-  const ORG_ID = 1; // TODO: Replace with dynamic org ID from auth or context
+const orgId = typeof window !== "undefined" ? localStorage.getItem("org_id") : null;
 
-  useEffect(() => {
+useEffect(() => {
+  if (orgId) {
     fetchUsers();
-  }, []);
+  } else {
+    alert("Organization ID is missing!");
+  }
+}, [orgId]);
 
-  const fetchUsers = async () => {
-    try {
-      const userList = await getUsersByOrganization(ORG_ID);
-      console.log("User list in UserPage.tsx:", userList);
+const fetchUsers = async () => {
+  if (!orgId) {
+    alert("Organization ID is missing!");
+    return;
+  }
+  try {
+    const userList = await getUsersByOrganization(Number(orgId));
+    console.log("User list in UserPage.tsx:", userList);
 
-      const transformed = userList.map((user: any) => ({
-        id: user.id,
-        name: user.full_name,
-        email: user.email,
-        user_type: user.user_type || 'User',
-      }));
-      setUsers(transformed);
-    } catch (err: any) {
-      alert("Failed to fetch users: " + err.message);
-    }
-  };
+    const transformed = userList.map((user: any) => ({
+      id: user.id,
+      name: user.full_name,
+      email: user.email,
+      user_type: user.user_type || "User",
+    }));
+    setUsers(transformed);
+  } catch (err: any) {
+    alert("Failed to fetch users: " + err.message);
+  }
+};
 
-  const handleAddUser = () => setShowForm(true);
+const handleAddUser = () => setShowForm(true);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await addUserToOrganization(ORG_ID, formData);
-      await fetchUsers();
-      setShowForm(false);
-      setFormData({ full_name: '', email: '', password: '' });
-    } catch (err: any) {
-      alert("Failed to add user: " + err.message);
-    }
-  };
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!orgId) {
+    alert("Organization ID is missing!");
+    return;
+  }
+  try {
+    await addUserToOrganization(Number(orgId), formData);
+    await fetchUsers();
+    setShowForm(false);
+    setFormData({ full_name: "", email: "", password: "" });
+  } catch (err: any) {
+    alert("Failed to add user: " + err.message);
+  }
+};
+
 
   return (
-    <DashboardLayout>
+
       <div className="p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-[#7F55B1]">Users</h2>
@@ -156,6 +169,6 @@ export default function UserPage() {
           </table>
         </div>
       </div>
-    </DashboardLayout>
+
   );
 }

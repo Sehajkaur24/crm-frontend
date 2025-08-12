@@ -1,5 +1,3 @@
-
-
 export async function registerAdmin(userData: {
   full_name: string;
   email: string;
@@ -19,11 +17,8 @@ export async function registerAdmin(userData: {
   if (!response.ok) {
     throw new Error(data.detail || 'Registration failed');
   }
-
   return data;
 }
-
-
 
 
 
@@ -32,7 +27,7 @@ export async function loginUser(credentials: {
   email: string;
   password: string;
 }) {
-  const response = await fetch('http://localhost:8000/v1/auth/sign-in ', {
+  const response = await fetch('http://localhost:8000/v1/auth/sign-in', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

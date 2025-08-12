@@ -1,12 +1,9 @@
-// components/DashboardLayout.tsx
+// src/app/dashboard/layout.tsx
 "use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
-
-interface DashboardLayoutProps {
-  children: ReactNode;
-}
 
 const links = [
   { name: "Home", href: "/dashboard" },
@@ -18,7 +15,7 @@ const links = [
   { name: "Settings", href: "/dashboard/settings" },
 ];
 
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
+export default function Layout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   return (
@@ -55,7 +52,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </header>
 
-        {/* Content injected here */}
+        {/* Injected content */}
         <main className="flex-1 p-6">{children}</main>
       </div>
     </div>
