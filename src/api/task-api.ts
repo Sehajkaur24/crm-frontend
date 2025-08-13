@@ -40,3 +40,29 @@ export async function getTasksByUserId(userId: number) {
 }
 
 
+export async function updateTask(taskId: number, taskData: {
+  title: string;
+  description: string;
+  status: string;
+  user_id: number;
+  organisation_id: number;
+}) {
+  const response = await fetch(`http://localhost:8000/v1/users/${taskId}/tasks`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(taskData),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.detail || 'Failed to update task');
+  }
+
+  return data.data; 
+}
+
+
+
+
