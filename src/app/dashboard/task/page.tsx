@@ -1,16 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 import Button from "@/components/Button";
+import { createTask, getTasksByUserId } from "@/api/task-api";
 
 type Task = {
   id: number;
   title: string;
   description: string;
   status: string;
-};
-
-const handleEditTask = (id: number) => {
-  alert(`Edit task with ID: ${id}`);
 };
 
 export default function TaskPage() {
@@ -22,30 +19,42 @@ export default function TaskPage() {
     status: "pending",
   });
 
-  // Dummy fetch - replace with real API
+  const userId = typeof window !== "undefined" ? Number(localStorage.getItem("user_id")) : 0;
+  const orgId = typeof window !== "undefined" ? Number(localStorage.getItem("organisation_id")) : 0;
+
+
   const fetchTasks = async () => {
-    // Replace this with your actual API call
-    const dummyTasks = [
-      { id: 1, title: "Task One", description: "First task", status: "pending" },
-      { id: 2, title: "Task Two", description: "Second task", status: "completed" },
-    ];
-    setTasks(dummyTasks);
+    try {
+      const taskList = await getTasksByUserId(userId);
+      setTasks(taskList);
+    } catch (error) {
+      console.error("Failed to fetch tasks:", error);
+    }
   };
 
   useEffect(() => {
-    fetchTasks();
-  }, []);
+    if (userId) fetchTasks();
+  }, [userId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const newTask = {
-      id: Date.now(),
-      ...formData,
-    };
-    setTasks((prev) => [...prev, newTask]);
+  e.preventDefault();
+
+  try {
+    await createTask({
+      title: formData.title,
+      description: formData.description,
+      status: formData.status,
+      user_id: 1, 
+      organisation_id: 1, 
+    });
+
+   
     setFormData({ title: "", description: "", status: "pending" });
     setShowForm(false);
-  };
+  } catch (error) {
+    console.error("Task creation failed:", error);
+  }
+};
 
   return (
     <div className="p-6">
@@ -144,7 +153,7 @@ export default function TaskPage() {
                 </td>
                 <td className="px-6 py-4">
                   <button
-                    onClick={() => handleEditTask(task.id)}
+                    onClick={() => alert(`Edit task with ID: ${task.id}`)}
                     className="text-[#7F55B1] hover:underline text-sm font-medium"
                   >
                     Edit
@@ -154,10 +163,7 @@ export default function TaskPage() {
             ))}
             {tasks.length === 0 && (
               <tr>
-                <td
-                  colSpan={4}
-                  className="text-center py-6 text-gray-500"
-                >
+                <td colSpan={4} className="text-center py-6 text-gray-500">
                   No tasks found.
                 </td>
               </tr>
