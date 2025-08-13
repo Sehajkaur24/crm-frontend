@@ -19,11 +19,7 @@ export default function TaskPage() {
     status: "pending",
   });
 
-  const userId = typeof window !== "undefined" ? Number(localStorage.getItem("user_id")) : 0;
-  const orgId = typeof window !== "undefined" ? Number(localStorage.getItem("organisation_id")) : 0;
-
-
-  const fetchTasks = async () => {
+  const fetchTasks = async (userId: number) => {
     try {
       const taskList = await getTasksByUserId(userId);
       setTasks(taskList);
@@ -33,19 +29,24 @@ export default function TaskPage() {
   };
 
   useEffect(() => {
-    if (userId) fetchTasks();
-  }, [userId]);
+    const userId = Number(localStorage.getItem("user_id"));
+    console.log(userId);
+    if (userId) fetchTasks(userId);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
+
+  const userId = Number(localStorage.getItem("user_id"));
+  const orgId = Number(localStorage.getItem("org_id"));
 
   try {
     await createTask({
       title: formData.title,
       description: formData.description,
       status: formData.status,
-      user_id: 1, 
-      organisation_id: 1, 
+      user_id: userId, 
+      organisation_id: orgId, 
     });
 
    

@@ -18,6 +18,7 @@ export default function LoginPage() {
 
       const token = result.data?.access_token;
       const orgId = result.data?.user?.organisation_id;
+      const userId = result.data?.user?.id;
 
       if (token) {
         localStorage.setItem("token", token);
@@ -25,6 +26,10 @@ export default function LoginPage() {
 
       if (orgId) {
         localStorage.setItem("org_id", orgId.toString());
+      }
+
+      if (userId) {
+        localStorage.setItem("user_id", userId.toString());
       }
 
       router.push("/dashboard");
