@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Button from "@/components/Button";
+import FormInput from "@/components/FormInput";
 import { createTask, getTasksByUserId, updateTask } from "@/api/task-api";
 import { getUsersByOrganization } from "@/api/user-api";
 
@@ -33,18 +34,8 @@ export default function TaskPage() {
     status: "pending",
   });
 
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
-  const [currentOrgId, setCurrentOrgId] = useState<number | null>(null);
-
-  // Load user_id and org_id from localStorage (browser only)
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const userId = Number(localStorage.getItem("user_id"));
-      const orgId = Number(localStorage.getItem("org_id"));
-      setCurrentUserId(userId || null);
-      setCurrentOrgId(orgId || null);
-    }
-  }, []);
+  const currentUserId = useRef<number | undefined>(undefined);
+  const currentOrgId = useRef<number | undefined>(undefined);
 
   const fetchTasks = async (userId: number) => {
     try {
@@ -57,28 +48,32 @@ export default function TaskPage() {
 
   // Load tasks for current user & load org users for dropdown
   useEffect(() => {
-    if (!currentUserId || !currentOrgId) return;
+    if (!currentUserId.current || !currentOrgId.current) {
+      currentUserId.current = Number(localStorage.getItem("user_id"));
+      currentOrgId.current = Number(localStorage.getItem("org_id"));
+    }
 
-    fetchTasks(currentUserId);
+    fetchTasks(currentUserId.current);
 
-    getUsersByOrganization(currentOrgId)
+    getUsersByOrganization(currentOrgId.current)
       .then((list) => {
         setUsers(list);
 
         // Default assignee = current user if found, else first user
         const defaultId =
-          (list.some((u: User) => u.id === currentUserId) && currentUserId) ||
+          (list.some((u: User) => u.id === currentUserId.current) &&
+            currentUserId.current) ||
           (list.length ? list[0].id : null);
 
         setSelectedUserId(defaultId);
       })
       .catch((e) => console.error("Failed to fetch org users:", e));
-  }, [currentUserId, currentOrgId]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!currentOrgId) {
+    if (!currentOrgId.current) {
       console.error("Missing org_id in localStorage");
       return;
     }
@@ -92,13 +87,13 @@ export default function TaskPage() {
         await updateTask(editingTask.id, {
           ...formData,
           user_id: selectedUserId,
-          organisation_id: currentOrgId,
+          organisation_id: currentOrgId.current,
         });
       } else {
         await createTask({
           ...formData,
           user_id: selectedUserId,
-          organisation_id: currentOrgId,
+          organisation_id: currentOrgId.current,
         });
       }
 
@@ -155,10 +150,10 @@ export default function TaskPage() {
             {editingTask ? "Edit Task" : "Add New Task"}
           </h3>
 
-          <input
-            type="text"
+          <FormInput
+            id="title"
+            label="Title"
             placeholder="Title"
-            className="w-full px-4 py-2 border border-gray-300 rounded-md"
             value={formData.title}
             onChange={(e) =>
               setFormData({ ...formData, title: e.target.value })
@@ -166,10 +161,10 @@ export default function TaskPage() {
             required
           />
 
-          <input
-            type="text"
+          <FormInput
+            id="description"
+            label="Description"
             placeholder="Description"
-            className="w-full px-4 py-2 border border-gray-300 rounded-md"
             value={formData.description}
             onChange={(e) =>
               setFormData({ ...formData, description: e.target.value })
@@ -249,11 +244,15 @@ export default function TaskPage() {
           <tbody>
             {tasks.map((task) => (
               <tr key={task.id} className="border-t">
-                <td className="px-6 py-4 text-sm text-gray-800">{task.title}</td>
+                <td className="px-6 py-4 text-sm text-gray-800">
+                  {task.title}
+                </td>
                 <td className="px-6 py-4 text-sm text-gray-800">
                   {task.description}
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-800">{task.status}</td>
+                <td className="px-6 py-4 text-sm text-gray-800">
+                  {task.status}
+                </td>
                 <td className="px-6 py-4 text-sm text-gray-800">
                   {userLabel(task.user_id)}
                 </td>
