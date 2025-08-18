@@ -99,7 +99,8 @@ export default function TaskPage() {
       setEditingTask(null);
       setShowForm(false);
 
-      fetchTasks(selectedUserId);
+      fetchTasks(currentOrgId.current!);
+
     } catch (error) {
       console.error("Failed to save task:", error);
     }
@@ -116,11 +117,17 @@ export default function TaskPage() {
     setShowForm(true);
   };
 
+  
+
+
+
   const userLabel = (id: number) => {
-    const u = users.find((x) => x.id === id);
-    if (!u) return `User #${id}`;
-    return `${u.full_name ?? ""}${u.full_name ? " — " : ""}${u.email}`;
-  };
+  const u = users.find((x) => x.id === id);
+  return u
+    ? `${u.full_name ?? ""}${u.full_name ? " — " : ""}${u.email}`
+    : "Unassigned";
+};
+
 
   return (
     <div className="p-6">
