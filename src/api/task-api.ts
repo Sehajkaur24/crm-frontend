@@ -1,5 +1,3 @@
-// src/api/task-api.ts
-
 export async function createTask(taskData: {
   title: string;
   description: string;
@@ -20,11 +18,12 @@ export async function createTask(taskData: {
     throw new Error(data.detail || 'Failed to create task');
   }
 
-  return data.data; // assuming `data.data` contains the created task
+  return data.data; 
 }
 
-export async function getTasksByUserId(userId: number) {
-  const response = await fetch(`http://localhost:8000/v1/users/${userId}/tasks`, {
+
+export async function getTasksByOrgId(orgId: number) {
+  const response = await fetch(`http://localhost:8000/v1/organisations/${orgId}/tasks`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -38,6 +37,7 @@ export async function getTasksByUserId(userId: number) {
 
   return data.data || [];
 }
+
 
 
 export async function updateTask(taskId: number, taskData: {

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Button from "@/components/Button";
 import FormInput from "@/components/FormInput";
-import { createTask, getTasksByUserId, updateTask } from "@/api/task-api";
+import { createTask, getTasksByOrgId, updateTask } from "@/api/task-api";
 import { getUsersByOrganization } from "@/api/user-api";
 
 type User = {
@@ -37,29 +37,27 @@ export default function TaskPage() {
   const currentUserId = useRef<number | undefined>(undefined);
   const currentOrgId = useRef<number | undefined>(undefined);
 
-  const fetchTasks = async (userId: number) => {
+  const fetchTasks = async (orgId: number) => {
     try {
-      const taskList = await getTasksByUserId(userId);
+      const taskList = await getTasksByOrgId(orgId);
       setTasks(taskList);
     } catch (error) {
       console.error("Failed to fetch tasks:", error);
     }
   };
 
-  // Load tasks for current user & load org users for dropdown
   useEffect(() => {
     if (!currentUserId.current || !currentOrgId.current) {
       currentUserId.current = Number(localStorage.getItem("user_id"));
       currentOrgId.current = Number(localStorage.getItem("org_id"));
     }
 
-    fetchTasks(currentUserId.current);
+    fetchTasks(currentOrgId.current);
 
     getUsersByOrganization(currentOrgId.current)
       .then((list) => {
         setUsers(list);
 
-        // Default assignee = current user if found, else first user
         const defaultId =
           (list.some((u: User) => u.id === currentUserId.current) &&
             currentUserId.current) ||
@@ -101,7 +99,6 @@ export default function TaskPage() {
       setEditingTask(null);
       setShowForm(false);
 
-      // Refresh list — show the assignee’s tasks after save
       fetchTasks(selectedUserId);
     } catch (error) {
       console.error("Failed to save task:", error);
@@ -172,7 +169,6 @@ export default function TaskPage() {
             required
           />
 
-          {/* Assignee dropdown */}
           <select
             value={selectedUserId ?? ""}
             onChange={(e) => setSelectedUserId(Number(e.target.value))}

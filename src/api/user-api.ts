@@ -79,12 +79,12 @@ export async function getUsersByOrganization(orgId: number) {
   });
 
   const data = await response.json();
-  console.log("Fetched users response:", data); // keep this log
+  console.log("Fetched users response:", data); 
 
   if (!response.ok) {
     throw new Error(data.detail || 'Failed to fetch users');
   }
 
-  // ✅ Return the actual array of users from backend structure
+
   return data.data || [];
 }
