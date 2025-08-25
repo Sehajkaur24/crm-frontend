@@ -1,16 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "@/components/Button";
 import FormInput from "@/components/FormInput";
-
-type Lead = {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  status: string;
-};
+import { getLeads, addLead, Lead } from "@/api/lead-api";
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -23,28 +16,49 @@ export default function LeadsPage() {
     status: "new",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  // ✅ Get orgId dynamically from localStorage
+  const orgId = typeof window !== "undefined" ? localStorage.getItem("org_id") : null;
 
-    if (editingLead) {
-    
-      setLeads((prev) =>
-        prev.map((l) =>
-          l.id === editingLead.id ? { ...formData, id: editingLead.id } : l
-        )
-      );
-    } else {
+  useEffect(() => {
+    if (!orgId) return; // if no orgId, don’t fetch
 
-      const newLead: Lead = {
-        id: Date.now(),
-        ...formData,
-      };
-      setLeads((prev) => [...prev, newLead]);
+    async function fetchLeads() {
+      try {
+        const data = await getLeads(Number(orgId)); // convert to number
+        setLeads(data);
+      } catch (error) {
+        console.error("Error fetching leads:", error);
+      }
     }
 
-    setFormData({ name: "", email: "", phone: "", status: "new" });
-    setEditingLead(null);
-    setShowForm(false);
+    fetchLeads();
+  }, [orgId]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!orgId) return; // safety check
+
+    try {
+      if (editingLead) {
+        // Update locally (API doesn’t support PUT)
+        setLeads((prev) =>
+          prev.map((l) =>
+            l.id === editingLead.id ? { ...formData, id: editingLead.id } : l
+          )
+        );
+      } else {
+        // Add new lead via API
+        const newLead = await addLead(Number(orgId), formData);
+        setLeads((prev) => [...prev, newLead]);
+      }
+
+      // Reset form
+      setFormData({ name: "", email: "", phone: "", status: "new" });
+      setEditingLead(null);
+      setShowForm(false);
+    } catch (error) {
+      console.error("Error submitting lead:", error);
+    }
   };
 
   const handleEdit = (lead: Lead) => {
@@ -60,7 +74,7 @@ export default function LeadsPage() {
 
   return (
     <div className="p-6">
-   
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-[#7F55B1]">Leads</h2>
         <div className="w-auto">
@@ -75,7 +89,7 @@ export default function LeadsPage() {
         </div>
       </div>
 
-     
+      {/* Form */}
       {showForm && (
         <form
           onSubmit={handleSubmit}
@@ -99,7 +113,9 @@ export default function LeadsPage() {
             label="Email"
             placeholder="Email Address"
             value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, email: e.target.value })
+            }
             required
           />
 
@@ -108,21 +124,32 @@ export default function LeadsPage() {
             label="Phone"
             placeholder="Phone Number"
             value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, phone: e.target.value })
+            }
           />
 
-          <select
-            value={formData.status}
-            onChange={(e) =>
-              setFormData({ ...formData, status: e.target.value })
-            }
-            className="w-full px-4 py-2 border border-gray-300 rounded-md"
-          >
-            <option value="new">New</option>
-            <option value="contacted">Contacted</option>
-            <option value="qualified">Qualified</option>
-            <option value="lost">Lost</option>
-          </select>
+          <div>
+            <label
+              htmlFor="status"
+              className="text-[#7F55B1] font-medium mb-1 block"
+            >
+              Status
+            </label>
+            <select
+              id="status"
+              value={formData.status}
+              onChange={(e) =>
+                setFormData({ ...formData, status: e.target.value })
+              }
+              className="w-full px-4 py-2 border border-[#9B7EBD] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F49BAB]"
+            >
+              <option value="new">New</option>
+              <option value="contacted">Contacted</option>
+              <option value="qualified">Qualified</option>
+              <option value="lost">Lost</option>
+            </select>
+          </div>
 
           <div className="flex gap-4">
             <div className="w-32">
@@ -143,26 +170,16 @@ export default function LeadsPage() {
         </form>
       )}
 
-
+      {/* Leads Table */}
       <div className="overflow-x-auto rounded-lg shadow">
         <table className="min-w-full bg-white border">
           <thead className="bg-gray-100">
             <tr>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
-                Name
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
-                Email
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
-                Phone
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">
-                Actions
-              </th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Name</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Email</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Phone</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Status</th>
+              <th className="px-6 py-3 text-left text-sm font-medium text-gray-600">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -171,9 +188,7 @@ export default function LeadsPage() {
                 <td className="px-6 py-4 text-sm text-gray-800">{lead.name}</td>
                 <td className="px-6 py-4 text-sm text-gray-800">{lead.email}</td>
                 <td className="px-6 py-4 text-sm text-gray-800">{lead.phone}</td>
-                <td className="px-6 py-4 text-sm text-gray-800">
-                  {lead.status}
-                </td>
+                <td className="px-6 py-4 text-sm text-gray-800">{lead.status}</td>
                 <td className="px-6 py-4">
                   <button
                     onClick={() => handleEdit(lead)}
