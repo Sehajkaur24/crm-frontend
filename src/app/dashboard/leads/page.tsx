@@ -16,15 +16,15 @@ export default function LeadsPage() {
     status: "new",
   });
 
-  // ✅ Get orgId dynamically from localStorage
+ 
   const orgId = typeof window !== "undefined" ? localStorage.getItem("org_id") : null;
 
   useEffect(() => {
-    if (!orgId) return; // if no orgId, don’t fetch
+    if (!orgId) return; 
 
     async function fetchLeads() {
       try {
-        const data = await getLeads(Number(orgId)); // convert to number
+        const data = await getLeads(Number(orgId)); 
         setLeads(data);
       } catch (error) {
         console.error("Error fetching leads:", error);
@@ -36,23 +36,23 @@ export default function LeadsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!orgId) return; // safety check
+    if (!orgId) return; 
 
     try {
       if (editingLead) {
-        // Update locally (API doesn’t support PUT)
+       
         setLeads((prev) =>
           prev.map((l) =>
             l.id === editingLead.id ? { ...formData, id: editingLead.id } : l
           )
         );
       } else {
-        // Add new lead via API
+     
         const newLead = await addLead(Number(orgId), formData);
         setLeads((prev) => [...prev, newLead]);
       }
 
-      // Reset form
+
       setFormData({ name: "", email: "", phone: "", status: "new" });
       setEditingLead(null);
       setShowForm(false);
@@ -74,7 +74,7 @@ export default function LeadsPage() {
 
   return (
     <div className="p-6">
-      {/* Header */}
+     
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-[#7F55B1]">Leads</h2>
         <div className="w-auto">
@@ -89,7 +89,7 @@ export default function LeadsPage() {
         </div>
       </div>
 
-      {/* Form */}
+   
       {showForm && (
         <form
           onSubmit={handleSubmit}
