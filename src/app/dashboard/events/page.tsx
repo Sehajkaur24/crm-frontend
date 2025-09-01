@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import axios from "axios";
 import Button from "@/components/Button";
 import FormInput from "@/components/FormInput";
+import { getEvents, addEvent } from "@/api/event-api";
 
 type Event = {
   id: number;
@@ -29,11 +29,9 @@ export default function EventsPage() {
 
   const fetchEvents = async () => {
     if (!orgId) return;
-    try {
-      const res = await axios.get(
-        `http://localhost:8000/v1/organisations/${orgId}/events`
-      );
-      setEvents(res.data.data || []);
+    try { 
+      const res = await getEvents(Number(orgId));
+      setEvents(res || []);
     } catch (error) {
       console.error("Error fetching events:", error);
     }
@@ -57,17 +55,15 @@ export default function EventsPage() {
           )
         );
       } else {
-        const res = await axios.post(
-          `http://localhost:8000/v1/organisations/${orgId}/events`,
-          {
-            title: formData.title,
-            event_date: formData.date, 
-            location: formData.location,
+        const res = await addEvent({
+          title: formData.title,
+          event_date: formData.date, 
+          location: formData.location,
             status: formData.status,
           }
         );
 
-        setEvents((prev) => [...prev, res.data.data]);
+        setEvents((prev) => [...prev, res]);
       }
 
       setFormData({ title: "", date: "", location: "", status: "scheduled" });

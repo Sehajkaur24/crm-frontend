@@ -13,11 +13,8 @@ export interface Event {
   updated_at: string;
 }
 
-export const getEvents = async (): Promise<Event[]> => {
-  const orgId = getOrgId();
-  if (!orgId) throw new Error("org_id not found in localStorage");
-
-  const res = await fetch(`${API_BASE}/organisations/${orgId}/events`);
+export const getEvents = async (org_id: number): Promise<Event[]> => {
+  const res = await fetch(`${API_BASE}/organisations/${org_id}/events`);
   if (!res.ok) throw new Error("Failed to fetch events");
   const data = await res.json();
   return data.data;
