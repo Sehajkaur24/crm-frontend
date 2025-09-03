@@ -3,12 +3,12 @@
 import { useState, useEffect } from "react";
 import Button from "@/components/Button";
 import FormInput from "@/components/FormInput";
-import { getEvents, addEvent } from "@/api/event-api";
+import { getEvents, addEvent, updateEvent } from "@/api/event-api"; 
 
 type Event = {
   id: number;
   title: string;
-  date: string;
+  date: string; 
   location: string;
   status: string;
 };
@@ -29,7 +29,7 @@ export default function EventsPage() {
 
   const fetchEvents = async () => {
     if (!orgId) return;
-    try { 
+    try {
       const res = await getEvents(Number(orgId));
       setEvents(res || []);
     } catch (error) {
@@ -48,23 +48,29 @@ export default function EventsPage() {
 
     try {
       if (editingEvent) {
-     
+   
+        const res = await updateEvent(editingEvent.id, {
+          title: formData.title,
+          date: formData.date, 
+          location: formData.location,
+          status: formData.status,
+        });
+
         setEvents((prev) =>
-          prev.map((ev) =>
-            ev.id === editingEvent.id ? { ...editingEvent, ...formData } : ev
-          )
+          prev.map((ev) => (ev.id === editingEvent.id ? res : ev))
         );
       } else {
+    
         const res = await addEvent({
           title: formData.title,
           event_date: formData.date, 
           location: formData.location,
-            status: formData.status,
-          }
-        );
+          status: formData.status,
+        });
 
         setEvents((prev) => [...prev, res]);
       }
+
 
       setFormData({ title: "", date: "", location: "", status: "scheduled" });
       setEditingEvent(null);
@@ -87,7 +93,6 @@ export default function EventsPage() {
 
   return (
     <div className="p-6">
-
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-[#7F55B1]">Events</h2>
         <div className="w-auto">
@@ -106,7 +111,6 @@ export default function EventsPage() {
           />
         </div>
       </div>
-
 
       {showForm && (
         <form
@@ -180,7 +184,6 @@ export default function EventsPage() {
           </div>
         </form>
       )}
-
 
       <div className="overflow-x-auto rounded-lg shadow">
         <table className="min-w-full bg-white border">

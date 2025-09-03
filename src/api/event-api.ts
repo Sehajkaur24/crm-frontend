@@ -41,3 +41,33 @@ export const addEvent = async (event: {
   const data = await res.json();
   return data.data;
 };
+
+
+export const updateEvent = async (
+  eventId: number,
+  event: {
+    title: string;
+    date: string;
+    location: string;
+    status: string;
+  }
+): Promise<Event> => {
+  const orgId = getOrgId();
+  if (!orgId) throw new Error("org_id not found in localStorage");
+
+  const res = await fetch(`${API_BASE}/events/${eventId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      ...event,
+      organisation_id: Number(orgId),
+    }),
+  });
+
+  if (!res.ok) throw new Error("Failed to update event");
+  const data = await res.json();
+  return data.data;
+};
+
