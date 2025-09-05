@@ -5,7 +5,7 @@ type FormInputProps = {
   label: string;
   type?: string;
   placeholder?: string;
-  value: string;
+  value: string | number;   // ✅ changed here
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
   autoComplete?: string;
