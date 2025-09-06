@@ -28,7 +28,6 @@ export const addEvent = async (event: {
 }): Promise<Event> => {
   const orgId = getOrgId();
   if (!orgId) throw new Error("org_id not found in localStorage");
-
   const res = await fetch(`${API_BASE}/organisations/${orgId}/events`, {
     method: "POST",
     headers: {
@@ -36,7 +35,6 @@ export const addEvent = async (event: {
     },
     body: JSON.stringify(event),
   });
-
   if (!res.ok) throw new Error("Failed to add event");
   const data = await res.json();
   return data.data;
@@ -54,7 +52,6 @@ export const updateEvent = async (
 ): Promise<Event> => {
   const orgId = getOrgId();
   if (!orgId) throw new Error("org_id not found in localStorage");
-
   const res = await fetch(`${API_BASE}/events/${eventId}`, {
     method: "PUT",
     headers: {

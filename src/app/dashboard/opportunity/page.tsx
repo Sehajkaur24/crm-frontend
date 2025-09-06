@@ -1,76 +1,74 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "@/components/Button";
 import FormInput from "@/components/FormInput";
-
-type Opportunity = {
-  id: number;
-  title: string;
-  amount: number;
-  stage: string;
-  closeDate: string;
-};
+import {Opportunity,getOpportunities,createOpportunity,updateOpportunity} from "@/api/opportunity-api";
 
 export default function OpportunitiesPage() {
-  const [opportunities, setOpportunities] = useState<Opportunity[]>([
-    {
-      id: 1,
-      title: "Opportunity 1",
-      amount: 50000,
-      stage: "Prospecting",
-      closeDate: "2025-09-10",
-    },
-    {
-      id: 2,
-      title: "Opportunity 2",
-      amount: 75000,
-      stage: "Negotiation",
-      closeDate: "2025-09-15",
-    },
-  ]);
-
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingOpportunity, setEditingOpportunity] = useState<Opportunity | null>(null);
+
   const [formData, setFormData] = useState({
     title: "",
     amount: 0,
     stage: "Prospecting",
-    closeDate: "",
+    close_date: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const data = await getOpportunities();
+        setOpportunities(data);
+      } catch (err) {
+        setError("Failed to load opportunities");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
 
-    if (editingOpportunity) {
-
-      setOpportunities((prev) =>
-        prev.map((opp) =>
-          opp.id === editingOpportunity.id
-            ? { ...editingOpportunity, ...formData }
-            : opp
-        )
-      );
-    } else {
-
-      const newOpportunity: Opportunity = {
-        id: opportunities.length + 1,
-        ...formData,
+    try {
+      const payload = {
+        title: formData.title,
+        amount: formData.amount.toString(), 
+        stage: formData.stage,
+        close_date: formData.close_date,
       };
-      setOpportunities((prev) => [...prev, newOpportunity]);
-    }
 
-    setFormData({ title: "", amount: 0, stage: "Prospecting", closeDate: "" });
-    setEditingOpportunity(null);
-    setShowForm(false);
+      if (editingOpportunity) {
+        const updated = await updateOpportunity(editingOpportunity.id, payload);
+        setOpportunities((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+      } else {
+        const newOpp = await createOpportunity(payload);
+        setOpportunities((prev) => [...prev, newOpp]);
+      }
+
+      setFormData({ title: "", amount: 0, stage: "Prospecting", close_date: "" });
+      setEditingOpportunity(null);
+      setShowForm(false);
+    } catch (err) {
+      setError(editingOpportunity ? "Failed to update opportunity" : "Failed to create opportunity");
+      console.error(err);
+    }
   };
 
   const handleEdit = (opp: Opportunity) => {
     setFormData({
       title: opp.title,
-      amount: opp.amount,
+      amount: Number(opp.amount),
       stage: opp.stage,
-      closeDate: opp.closeDate,
+      close_date: opp.close_date,
     });
     setEditingOpportunity(opp);
     setShowForm(true);
@@ -86,7 +84,7 @@ export default function OpportunitiesPage() {
             onClick={() => {
               setShowForm(!showForm);
               if (!showForm) {
-                setFormData({ title: "", amount: 0, stage: "Prospecting", closeDate: "" });
+                setFormData({ title: "", amount: 0, stage: "Prospecting", close_date: "" });
                 setEditingOpportunity(null);
               }
             }}
@@ -94,11 +92,10 @@ export default function OpportunitiesPage() {
         </div>
       </div>
 
+      {error && <div className="text-red-500 mb-4">{error}</div>}
+
       {showForm ? (
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4 bg-white p-6 rounded shadow"
-        >
+        <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded shadow">
           <FormInput
             id="title"
             label="Title"
@@ -139,13 +136,11 @@ export default function OpportunitiesPage() {
           </div>
 
           <FormInput
-            id="closeDate"
+            id="close_date"
             type="date"
             label="Close Date"
-            value={formData.closeDate}
-            onChange={(e) =>
-              setFormData({ ...formData, closeDate: e.target.value })
-            }
+            value={formData.close_date}
+            onChange={(e) => setFormData({ ...formData, close_date: e.target.value })}
             required
           />
 
@@ -165,6 +160,8 @@ export default function OpportunitiesPage() {
             </div>
           </div>
         </form>
+      ) : loading ? (
+        <p>Loading opportunities...</p>
       ) : (
         <div className="overflow-x-auto rounded-lg shadow">
           <table className="min-w-full bg-white border">
@@ -193,7 +190,7 @@ export default function OpportunitiesPage() {
                   <td className="px-6 py-4 text-sm text-gray-800">{opp.title}</td>
                   <td className="px-6 py-4 text-sm text-gray-800">${opp.amount}</td>
                   <td className="px-6 py-4 text-sm text-gray-800">{opp.stage}</td>
-                  <td className="px-6 py-4 text-sm text-gray-800">{opp.closeDate}</td>
+                  <td className="px-6 py-4 text-sm text-gray-800">{opp.close_date}</td>
                   <td className="px-6 py-4">
                     <button
                       onClick={() => handleEdit(opp)}
