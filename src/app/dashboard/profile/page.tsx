@@ -1,65 +1,104 @@
 "use client";
 
 import { useState } from "react";
-import Button from "@/components/Button";
 import FormInput from "@/components/FormInput";
+import Button from "@/components/Button";
 
 export default function ProfilePage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    role: "",
-    phone: "",
-    address: "",
-    company: "",
-    password: "",
+    oldPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSave = () => {
-    console.log("Saved profile", formData);
+    console.log("Profile saved", formData);
   };
 
   const handleCancel = () => {
-    console.log("Cancelled changes");
+    console.log("Changes cancelled");
+  };
+
+  const handlePasswordSave = () => {
+    console.log("Password changed", {
+      oldPassword: formData.oldPassword,
+      newPassword: formData.newPassword,
+      confirmPassword: formData.confirmPassword,
+    });
   };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="p-6">
       <h1 className="text-2xl font-bold text-[#7F55B1] mb-6">Profile</h1>
+
       <div className="bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto space-y-6">
-        <div>
-          <h2 className="text-xl font-semibold text-[#7F55B1]">{formData.name || "John Doe"}</h2>
-          <p className="text-gray-600">{formData.role || "Role"}</p>
+        <FormInput
+          id="name"
+          label="Full Name"
+          placeholder="Enter full name"
+          value={formData.name}
+          onChange={handleChange}
+          required
+        />
+
+        <FormInput
+          id="email"
+          label="Email"
+          placeholder="Enter email address"
+          value={formData.email}
+          onChange={handleChange}
+          required
+          type="email"
+        />
+
+        <div className="flex space-x-4">
+          <Button text="Cancel" variant="secondary" onClick={handleCancel} />
+          <Button text="Save" variant="primary" onClick={handleSave} />
         </div>
 
-        <form className="space-y-4">
-          <FormInput id="name" label="Full Name" value={formData.name} onChange={handleChange as React.ChangeEventHandler<HTMLInputElement>} placeholder="Enter full name"/>
+        <div className="pt-6 border-t border-gray-200 space-y-4">
+          <h2 className="text-lg font-semibold text-[#7F55B1]">Change Password</h2>
 
-          <FormInput id="email" label="Email" type="email" value={formData.email} onChange={handleChange as React.ChangeEventHandler<HTMLInputElement>} placeholder="Enter email address"/>
+          <FormInput
+            id="oldPassword"
+            label="Old Password"
+            type="password"
+            placeholder="Enter old password"
+            value={formData.oldPassword}
+            onChange={handleChange}
+            required
+          />
 
-          <FormInput id="role" label="Role" value={formData.role} onChange={handleChange as React.ChangeEventHandler<HTMLInputElement>} placeholder="Enter role"/>
+          <FormInput
+            id="newPassword"
+            label="New Password"
+            type="password"
+            placeholder="Enter new password"
+            value={formData.newPassword}
+            onChange={handleChange}
+            required
+          />
 
-          <FormInput id="phone" label="Phone Number" value={formData.phone} onChange={handleChange as React.ChangeEventHandler<HTMLInputElement>} placeholder="Enter phone number"/>
+          <FormInput
+            id="confirmPassword"
+            label="Confirm Password"
+            type="password"
+            placeholder="Confirm new password"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            required
+          />
 
-   
-          <div className="flex flex-col">
-            <label htmlFor="address" className="text-[#7F55B1] font-medium mb-1"> Address</label>
-            <textarea id="address" name="address" value={formData.address} onChange={handleChange} rows={3} placeholder="Enter address" className="w-full px-4 py-2 border border-[#9B7EBD] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F49BAB]"/>
+          <div className="flex justify-end">
+            <Button text="Save Password" variant="primary" onClick={handlePasswordSave} />
           </div>
-
-          <FormInput id="company" label="Company" value={formData.company} onChange={handleChange as React.ChangeEventHandler<HTMLInputElement>} placeholder="Enter company name"/>
-
-          <FormInput id="password" label="Change Password" type="password" value={formData.password} onChange={handleChange as React.ChangeEventHandler<HTMLInputElement>} placeholder="Enter new password"/>
-
-          <div className="flex justify-end space-x-4 pt-4">
-            <Button text="Cancel" variant="secondary" onClick={handleCancel} />
-            <Button text="Save" variant="primary" onClick={handleSave} />
-          </div>
-        </form>
+        </div>
       </div>
     </div>
   );
