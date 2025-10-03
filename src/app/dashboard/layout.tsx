@@ -50,7 +50,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex-1 flex flex-col overflow-y-auto">
-        <header className="h-16 bg-white shadow-md flex items-center justify-end px-6">
+        <header className="bg-white shadow-md flex items-center justify-end p-6">
           <div className="space-x-4">
             <a href="/dashboard/profile" className="text-[#7F55B1] hover:underline">Profile</a>
 

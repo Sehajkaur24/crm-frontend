@@ -4,8 +4,9 @@ type FormInputProps = {
   id: string;
   label: string;
   type?: string;
+ name?: string; 
   placeholder?: string;
-  value: string | number;   // ✅ changed here
+  value: string | number;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
   autoComplete?: string;
@@ -14,6 +15,7 @@ type FormInputProps = {
 const FormInput: React.FC<FormInputProps> = ({
   id,
   label,
+  name,
   type = "text",
   placeholder = "",
   value,
@@ -29,6 +31,7 @@ const FormInput: React.FC<FormInputProps> = ({
       <input
         id={id}
         type={type}
+        name={name}
         placeholder={placeholder}
         value={value}
         onChange={onChange}
